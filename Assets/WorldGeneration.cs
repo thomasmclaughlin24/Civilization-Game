@@ -41,6 +41,8 @@ public class WorldGeneration : MonoBehaviour
         gm.empires.Add(e);
         gm.player = e;
         Debug.Log(startTile.x + ", " + startTile.y + ", " + startTile.type);
+        gm.mapWidth = mapWidth;
+        gm.mapHeight = mapHeight;
     }
     // Pick certain num random tiles (always 5 tiles or area / 5 for example), pick same num of random positions (random x and y value), all tiles different
     // Update is called once per frame

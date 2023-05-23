@@ -10,9 +10,12 @@ public class GameManager : MonoBehaviour
     public TerrainTile[,] tiles;
     public List<Empires> empires = new List<Empires>();
     public Empires player;
+    public int mapHeight;
+    public int mapWidth;
     // Start is called before the first frame update
     void Start()
     {
+
     }
 
     // Update is called once per frame
