@@ -16,6 +16,7 @@ public class WorldGeneration : MonoBehaviour
     public string GenerationType = "Four Corners";
     private TerrainTile startTile;
     public Tilemap overlay;
+    public Tilemap unitoverlay;
     public GameManager gm;
     //private Tilemap map;
     // Start is called before the first frame update
@@ -29,6 +30,7 @@ public class WorldGeneration : MonoBehaviour
             FourCornerGeneration();
         }
         gm.overlay = overlay;
+        gm.unitoverlay = unitoverlay;
         gm.terrainmap = map;
         gm.tiles = tiles;
         startTile = tiles[Random.Range(1, tiles.GetLength(0) - 1), Random.Range(1, tiles.GetLength(1) - 1)];
@@ -40,7 +42,7 @@ public class WorldGeneration : MonoBehaviour
         startTile.AddCity(overlay, e);
         gm.empires.Add(e);
         gm.player = e;
-        Debug.Log(startTile.x + ", " + startTile.y + ", " + startTile.type);
+        Debug.Log(gm.player);
         gm.mapWidth = mapWidth;
         gm.mapHeight = mapHeight;
     }

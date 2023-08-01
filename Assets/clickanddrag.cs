@@ -27,7 +27,6 @@ public class clickanddrag : MonoBehaviour
                 dragStartPos = mousepos;
             }
             dragDistance = mousepos - Camera.main.transform.position;
-            Debug.Log(dragDistance);
         }
         else
         {

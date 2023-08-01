@@ -18,14 +18,11 @@ public class TurnButton : MonoBehaviour
         {
             foreach(City c in e.cities)
             {
-                foreach(TerrainTile tile in c.OwnedTiles)
-                {
-                    e.totalfood += tile.basefood;
-                    e.totalgold += tile.basegold;
-                    e.totalproduction += tile.baseproduction;
-                    e.totalculture += tile.baseculture;
-                    e.totalfaith += tile.basefaith;
-                }
+                e.totalfood += c.GetFoodPerTurn();
+                e.totalgold += c.GetGoldPerTurn();
+                e.totalproduction += c.GetProductionPerTurn();
+                e.totalculture += c.GetCulturePerTurn();
+                e.totalfaith += c.GetFaithPerTurn();
             }
             Debug.Log(e.totalfood);
         }

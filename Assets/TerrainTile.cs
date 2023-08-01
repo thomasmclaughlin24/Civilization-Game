@@ -20,6 +20,7 @@ public class TerrainTile
     public static Sprite cityImage;
     public GameManager gm;
     public int gridX, gridY;
+    public City city;
 
     public TerrainTile(string type, int x, int y, GameManager gm, int gridX, int gridY)
     {
@@ -32,9 +33,9 @@ public class TerrainTile
         if(type == "Grass")
         {
             basefood = 5;
-            basegold = 3;
-            baseproduction = 2;
-            baseculture = 3;
+            basegold = 1;
+            baseproduction = 4;
+            baseculture = 2;
             basefaith = 2;
             tileImage = grassImage;
         }
@@ -44,16 +45,16 @@ public class TerrainTile
             basegold = 2;
             baseproduction = 3;
             baseculture = 5;
-            basefaith = 4;
+            basefaith = 5;
             tileImage = waterImage;
         }
         if (type == "Gravel")
         {
             basefood = 2;
             basegold = 5;
-            baseproduction = 4;
-            baseculture = 2;
-            basefaith = 3;
+            baseproduction = 5;
+            baseculture = 1;
+            basefaith = 1;
             tileImage = gravelImage;
         }
         if (type == "Sand")
@@ -62,15 +63,15 @@ public class TerrainTile
             basegold = 4;
             baseproduction = 2;
             baseculture = 4;
-            basefaith = 4;
+            basefaith = 3;
             tileImage = sandImage;
         }
         if (type == "Desert")
         {
-            basefood = 1;
+            basefood = 3;
             basegold = 3;
             baseproduction = 1;
-            baseculture = 2;
+            baseculture = 3;
             basefaith = 4;
             tileImage = desertImage;
         }
@@ -96,5 +97,20 @@ public class TerrainTile
         hasCity = true;
         City c = new City(this);
         empire.cities.Add(c);
+        c.empire = empire;
+        city = c;
+    }
+
+    public void SetTile(Tilemap map, Sprite sprite)
+    {
+        Vector3Int position = new Vector3Int(x, y, 0);
+        SetTile(position, map, sprite);
+    }
+
+    public void SetTile(Vector3Int position, Tilemap map, Sprite sprite)
+    {
+        Tile t = ScriptableObject.CreateInstance<Tile>();
+        t.sprite = sprite;
+        map.SetTile(position, t);
     }
 }

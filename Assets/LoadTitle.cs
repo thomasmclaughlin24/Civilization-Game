@@ -13,6 +13,7 @@ public class LoadTitle : MonoBehaviour
     void Start()
     {
         IntroVideo.loopPointReached += OnFinished;
+        IntroVideo.url = System.IO.Path.Combine(Application.streamingAssetsPath, "Super Mario Civilization Intro.mp4");
     }
 
     // Update is called once per frame
