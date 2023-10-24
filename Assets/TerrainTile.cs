@@ -21,6 +21,7 @@ public class TerrainTile
     public GameManager gm;
     public int gridX, gridY;
     public City city;
+    public Buildings building;
 
     public TerrainTile(string type, int x, int y, GameManager gm, int gridX, int gridY)
     {

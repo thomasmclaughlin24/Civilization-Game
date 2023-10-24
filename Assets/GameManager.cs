@@ -6,8 +6,14 @@ using UnityEngine.Tilemaps;
 public class GameManager : MonoBehaviour
 {
     public Tilemap terrainmap;
-    public Tilemap overlay;
+    public Tilemap overlayA;
+    public Tilemap overlayB;
+    public Tilemap overlayC;
+    public Tilemap overlayD;
+    public Tilemap overlayE;
+    public Tilemap overlayF;
     public Tilemap unitoverlay;
+    public Tilemap buildingoverlay;
     public TerrainTile[,] tiles;
     public List<Empires> empires = new List<Empires>();
     public Empires player;
@@ -15,6 +21,7 @@ public class GameManager : MonoBehaviour
     public int mapWidth;
     public Vector3Int hit;
     public List<Buildings> buildings = new List<Buildings>();
+    public string productionMode = "Production";
     // Start is called before the first frame update
     void Start()
     {

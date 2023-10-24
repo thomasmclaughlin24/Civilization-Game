@@ -23,6 +23,5 @@ public class CityNaming : MonoBehaviour
     public void CloseCityNaming()
     {
         CityName.SetActive(false);
-        Debug.Log(CityNameInput.GetComponent<TextMeshProUGUI>().text);
     }
 }

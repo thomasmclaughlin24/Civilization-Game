@@ -14,7 +14,6 @@ public class CityPanel : MonoBehaviour
     public GameObject cultureperturn;
     public GameObject faithperturn;
     public GameObject cityNameInput;
-    public GameObject totalproduction;
 
     // Start is called before the first frame update
     void Start()
@@ -25,7 +24,7 @@ public class CityPanel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        UpdateText();
     }
 
     public void UpdateText()
@@ -38,8 +37,6 @@ public class CityPanel : MonoBehaviour
             productionperturn.GetComponent<TextMeshProUGUI>().text = "Production Per Turn: " + city.GetProductionPerTurn().ToString();
             cultureperturn.GetComponent<TextMeshProUGUI>().text = "Culture Per Turn: " + city.GetCulturePerTurn().ToString();
             faithperturn.GetComponent<TextMeshProUGUI>().text = "Faith Per Turn: " + city.GetFaithPerTurn().ToString();
-            Debug.Log(city.empire);
-            totalproduction.GetComponent<TextMeshProUGUI>().text = "Total Production: " + city.empire.totalproduction.ToString();
         }
     }
 }

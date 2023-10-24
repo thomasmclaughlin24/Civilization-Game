@@ -8,57 +8,206 @@ public class City
     private TerrainTile centralTile;
     public List<TerrainTile> OwnedTiles;
     private GameManager gm;
-    public static Sprite abc, abf, aef, bcd, cde, def;
+    public static Sprite a, b, c, d, e, f;
     public Empires empire;
-    
+    public float foodmodifier = 1f;
+    public float goldmodifier = 1f;
+    public float productionmodifier = 1f;
+    public float culturemodifier = 1f;
+    public float faithmodifier = 1f;
+
     public City(TerrainTile centralTile)
     {
         OwnedTiles = new List<TerrainTile>();
         this.centralTile = centralTile;
         gm = centralTile.gm;
         TerrainTile[,] tiles = gm.tiles;
-        Debug.Log(tiles[centralTile.gridX, centralTile.gridY].type);
         if(centralTile.y % 2 == 0)
         {
-            OwnedTiles.Add(tiles[centralTile.gridX + 1, centralTile.gridY]);
-            centralTile.SetTile(new Vector3Int(centralTile.x + 1, centralTile.y, 0), gm.overlay, abf);
-            OwnedTiles.Add(tiles[centralTile.gridX, centralTile.gridY + 1]);
-            centralTile.SetTile(new Vector3Int(centralTile.x, centralTile.y + 1, 0), gm.overlay, abc);
-            OwnedTiles.Add(tiles[centralTile.gridX - 1, centralTile.gridY]);
-            centralTile.SetTile(new Vector3Int(centralTile.x - 1, centralTile.y, 0), gm.overlay, cde);
-            OwnedTiles.Add(tiles[centralTile.gridX, centralTile.gridY - 1]);
-            centralTile.SetTile(new Vector3Int(centralTile.x, centralTile.y - 1, 0), gm.overlay, aef);
-            OwnedTiles.Add(tiles[centralTile.gridX - 1, centralTile.gridY + 1]);
-            centralTile.SetTile(new Vector3Int(centralTile.x - 1, centralTile.y + 1, 0), gm.overlay, bcd);
-            OwnedTiles.Add(tiles[centralTile.gridX - 1, centralTile.gridY - 1]);
-            centralTile.SetTile(new Vector3Int(centralTile.x - 1, centralTile.y - 1, 0), gm.overlay, def);
+            AddTile(tiles[centralTile.gridX + 1, centralTile.gridY]);
+            AddTile(tiles[centralTile.gridX, centralTile.gridY + 1]);
+            AddTile(tiles[centralTile.gridX - 1, centralTile.gridY]);
+            AddTile(tiles[centralTile.gridX, centralTile.gridY - 1]);
+            AddTile(tiles[centralTile.gridX - 1, centralTile.gridY + 1]);
+            AddTile(tiles[centralTile.gridX - 1, centralTile.gridY - 1]);
         }
         else
         {
-            OwnedTiles.Add(tiles[centralTile.gridX, centralTile.gridY - 1]);
-            centralTile.SetTile(new Vector3Int(centralTile.x, centralTile.y - 1, 0), gm.overlay, def);
-            OwnedTiles.Add(tiles[centralTile.gridX + 1, centralTile.gridY]);
-            centralTile.SetTile(new Vector3Int(centralTile.x + 1, centralTile.y, 0), gm.overlay, abf);
-            OwnedTiles.Add(tiles[centralTile.gridX - 1, centralTile.gridY]);
-            centralTile.SetTile(new Vector3Int(centralTile.x - 1, centralTile.y, 0), gm.overlay, cde);
-            OwnedTiles.Add(tiles[centralTile.gridX, centralTile.gridY + 1]);
-            centralTile.SetTile(new Vector3Int(centralTile.x, centralTile.y + 1, 0), gm.overlay, bcd);
-            OwnedTiles.Add(tiles[centralTile.gridX + 1, centralTile.gridY + 1]);
-            centralTile.SetTile(new Vector3Int(centralTile.x + 1, centralTile.y + 1, 0), gm.overlay, abc);
-            OwnedTiles.Add(tiles[centralTile.gridX + 1, centralTile.gridY - 1]);
-            centralTile.SetTile(new Vector3Int(centralTile.x + 1, centralTile.y - 1, 0), gm.overlay, aef);
+            AddTile(tiles[centralTile.gridX, centralTile.gridY - 1]);
+            AddTile(tiles[centralTile.gridX + 1, centralTile.gridY]);
+            AddTile(tiles[centralTile.gridX - 1, centralTile.gridY]);
+            AddTile(tiles[centralTile.gridX, centralTile.gridY + 1]);
+            AddTile(tiles[centralTile.gridX + 1, centralTile.gridY + 1]);
+            AddTile(tiles[centralTile.gridX + 1, centralTile.gridY - 1]);
         }
-        centralTile.SetTile(new Vector3Int(centralTile.x, centralTile.y, 0), gm.overlay, TerrainTile.cityImage);
+        centralTile.SetTile(new Vector3Int(centralTile.x, centralTile.y, 0), gm.buildingoverlay, TerrainTile.cityImage);
+        AddTile(centralTile);
     }
 
     public static void LoadImages()
     {
-        abc = Resources.Load<Sprite>("Tile Sprites/abc");
-        abf = Resources.Load<Sprite>("Tile Sprites/abf");
-        aef = Resources.Load<Sprite>("Tile Sprites/aef");
-        bcd = Resources.Load<Sprite>("Tile Sprites/bcd");
-        cde = Resources.Load<Sprite>("Tile Sprites/cde");
-        def = Resources.Load<Sprite>("Tile Sprites/def");
+        a = Resources.Load<Sprite>("Tile Sprites/a");
+        b = Resources.Load<Sprite>("Tile Sprites/b");
+        c = Resources.Load<Sprite>("Tile Sprites/c");
+        d = Resources.Load<Sprite>("Tile Sprites/d");
+        e = Resources.Load<Sprite>("Tile Sprites/e");
+        f = Resources.Load<Sprite>("Tile Sprites/f");
+    }
+
+    private void AddTile(TerrainTile tile)
+    {
+        if (tile.city == this)
+        {
+            return;
+        }
+        OwnedTiles.Add(tile);
+        tile.city = this;
+        CityBoundaryAdjustment();
+    }
+
+    private void CityBoundaryAdjustment()
+    {
+        TerrainTile[,] tiles = gm.tiles;
+        foreach (TerrainTile tile in OwnedTiles)
+        {
+            if (tile.y % 2 == 0)
+            {
+                if(tile.gridX < tiles.GetLength(0) - 1 && tiles[tile.gridX + 1, tile.gridY].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayA, a);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayA, null);
+                }
+                if(tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX, tile.gridY + 1].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayB, b);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayB, null);
+                }
+                if(tile.gridX > 0 && tiles[tile.gridX - 1, tile.gridY].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayD, d);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayD, null);
+                }
+                if(tile.gridY > 0 && tiles[tile.gridX, tile.gridY - 1].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayF, f);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayF, null);
+                }
+                if(tile.gridX > 0 && tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX - 1, tile.gridY + 1].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayC, c);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayC, null);
+                }
+                if(tile.gridX > 0 && tile.gridY > 0 && tiles[tile.gridX - 1, tile.gridY - 1].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayE, e);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayE, null);
+                }
+            }
+            else
+            {
+                if(tile.gridY > 0 && tiles[tile.gridX, tile.gridY - 1].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayE, e);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayE, null);
+                }
+                if(tile.gridX < tiles.GetLength(0) - 1 && tiles[tile.gridX + 1, tile.gridY].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayA, a);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayA, null);
+                }
+                if(tile.gridX > 0 && tiles[tile.gridX - 1, tile.gridY].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayD, d);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayD, null);
+                }
+                if(tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX, tile.gridY + 1].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayC, c);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayC, null);
+                }
+                if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX + 1, tile.gridY + 1].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayB, b);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayB, null);
+                }
+                if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY > 0 && tiles[tile.gridX + 1, tile.gridY - 1].city == null)
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayF, f);
+                }
+                else
+                {
+                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayF, null);
+                }
+            }
+        }
+    }
+
+    internal void ExpandTile(TerrainTile tile)
+    {
+        TerrainTile[,] tiles = gm.tiles;
+        if (tile.y % 2 == 0)
+        {
+            if(tile.gridX < tiles.GetLength(0) - 1)
+                AddTile(tiles[tile.gridX + 1, tile.gridY]);
+            if(tile.gridY < tiles.GetLength(1) - 1)
+                AddTile(tiles[tile.gridX, tile.gridY + 1]);
+            if(tile.gridX > 0)
+                AddTile(tiles[tile.gridX - 1, tile.gridY]);
+            if(tile.gridY > 0)
+                AddTile(tiles[tile.gridX, tile.gridY - 1]);
+            if(tile.gridX > 0 && tile.gridY < tiles.GetLength(1) - 1)
+                AddTile(tiles[tile.gridX - 1, tile.gridY + 1]);
+            if(tile.gridX > 0 && tile.gridY > 0)
+                AddTile(tiles[tile.gridX - 1, tile.gridY - 1]);
+        }
+        else
+        {
+            if(tile.gridY > 0)
+                AddTile(tiles[tile.gridX, tile.gridY - 1]);
+            if(tile.gridX < tiles.GetLength(0) - 1)
+                AddTile(tiles[tile.gridX + 1, tile.gridY]);
+            if(tile.gridX > 0)
+                AddTile(tiles[tile.gridX - 1, tile.gridY]);
+            if(tile.gridY < tiles.GetLength(1) - 1)
+                AddTile(tiles[tile.gridX, tile.gridY + 1]);
+            if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY < tiles.GetLength(1) - 1)
+                AddTile(tiles[tile.gridX + 1, tile.gridY + 1]);
+            if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY > 0)
+                AddTile(tiles[tile.gridX + 1, tile.gridY - 1]);
+        }
     }
 
     public int GetFoodPerTurn()
@@ -68,7 +217,7 @@ public class City
         {
             foodperturn += tile.basefood;
         }
-        return foodperturn;
+        return (int)(foodperturn + foodmodifier);
     }
 
     public int GetGoldPerTurn()
@@ -78,7 +227,7 @@ public class City
         {
             goldperturn += tile.basegold;
         }
-        return goldperturn;
+        return (int)(goldperturn + goldmodifier);
     }
 
     public int GetProductionPerTurn()
@@ -88,7 +237,7 @@ public class City
         {
             productionperturn += tile.baseproduction;
         }
-        return productionperturn;
+        return (int)(productionperturn + productionmodifier);
     }
 
     public int GetCulturePerTurn()
@@ -98,7 +247,7 @@ public class City
         {
             cultureperturn += tile.baseculture;
         }
-        return cultureperturn;
+        return (int)(cultureperturn + culturemodifier);
     }
 
     public int GetFaithPerTurn()
@@ -108,6 +257,6 @@ public class City
         {
             faithperturn += tile.basefaith;
         }
-        return faithperturn;
+        return (int)(faithperturn + faithmodifier);
     }
 }
