@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class Buildings
 {
@@ -12,11 +13,12 @@ public class Buildings
     public float productionmodifier = 1f;
     public float culturemodifier = 1f;
     public float faithmodifier = 1f;
+    public bool allowedOnWater = false;
     public City city;
     public string name;
     public Sprite image;
 
-    public Buildings(string name, int productioncost, int goldcost, int faithcost, float foodmodifier, float goldmodifier, float productionmodifier, float culturemodifier, float faithmodifier, Sprite image)
+    public Buildings(string name, int productioncost, int goldcost, int faithcost, float foodmodifier, float goldmodifier, float productionmodifier, float culturemodifier, float faithmodifier, Sprite image, bool allowedOnWater)
     {
         this.name = name;
         this.productioncost = productioncost;
@@ -28,6 +30,7 @@ public class Buildings
         this.culturemodifier = culturemodifier;
         this.faithmodifier = faithmodifier;
         this.image = image;
+        this.allowedOnWater = allowedOnWater;
     }
 
     public Buildings(string name)
@@ -54,6 +57,7 @@ public class Buildings
             this.productionmodifier = 1f;
             this.culturemodifier = 5f;
             this.faithmodifier = 0f;
+            this.allowedOnWater = true;
         }
         else if (name == "Mine")
         {
@@ -76,6 +80,7 @@ public class Buildings
             this.productionmodifier = 3f;
             this.culturemodifier = 6f;
             this.faithmodifier = 3f;
+            this.allowedOnWater = true;
         }
         else if (name == "Temple")
         {
@@ -87,6 +92,7 @@ public class Buildings
             this.productionmodifier = 1f;
             this.culturemodifier = 7f;
             this.faithmodifier = 7f;
+            this.allowedOnWater = true;
         }
         else if (name == "World Wonder")
         {
@@ -98,6 +104,7 @@ public class Buildings
             this.productionmodifier = 3f;
             this.culturemodifier = 6f;
             this.faithmodifier = 5f;
+            this.allowedOnWater = true;
         }
         else
         {
@@ -110,6 +117,46 @@ public class Buildings
             this.productionmodifier = 1f;
             this.culturemodifier = 1f;
             this.faithmodifier = 1f;
+        }
+    }
+
+    public static void PurchaseBuilding(GameManager gm, string buildingName, City city, string productionMode)
+    {
+        var buildings = new Buildings(buildingName);
+        if ((buildings.productioncost > 0 && city.empire.totalproduction >= buildings.productioncost && productionMode == "Production") ||
+            (buildings.goldcost > 0 && city.empire.totalgold >= buildings.goldcost && productionMode == "Gold") ||
+            (buildings.faithcost > 0 && city.empire.totalfaith >= buildings.faithcost && productionMode == "Faith"))
+        {
+            TerrainTile buildingtile;
+            for (var i = 0; i < city.OwnedTiles.Count; i++)
+            {
+                buildingtile = city.OwnedTiles[i];
+                if (buildingtile.building == null && !buildingtile.hasCity && buildingtile.city == city && (buildingtile.type != "Water" || buildings.allowedOnWater == true))
+                {
+                    buildingtile.building = buildings;
+                    Vector3Int position = new Vector3Int(buildingtile.x, buildingtile.y, 0);
+                    Tile t = ScriptableObject.CreateInstance<Tile>();
+                    t.sprite = buildings.image;
+                    gm.buildingoverlay.SetTile(position, t);
+                    if (productionMode == "Production")
+                        city.empire.totalproduction -= buildings.productioncost;
+                    if (productionMode == "Gold")
+                        city.empire.totalgold -= buildings.goldcost;
+                    if (productionMode == "Faith")
+                        city.empire.totalfaith -= buildings.faithcost;
+                    city.foodmodifier += buildings.foodmodifier;
+                    city.goldmodifier += buildings.goldmodifier;
+                    city.productionmodifier += buildings.productionmodifier;
+                    city.culturemodifier += buildings.culturemodifier;
+                    city.faithmodifier += buildings.faithmodifier;
+                    city.ExpandTile(buildingtile);
+                    return;
+                }
+                else if (i == city.OwnedTiles.Count - 1)
+                {
+                    Debug.Log("No more tiles.");
+                }
+            }
         }
     }
 }

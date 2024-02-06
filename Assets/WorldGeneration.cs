@@ -14,7 +14,6 @@ public class WorldGeneration : MonoBehaviour
     public string[] TerrainTypes;
     private Tilemap map;
     public string GenerationType = "Four Corners";
-    private TerrainTile startTile;
     public Tilemap unitoverlay;
     public Tilemap buildingoverlay;
     public Tilemap overlayA;
@@ -29,7 +28,6 @@ public class WorldGeneration : MonoBehaviour
     void Start()
     {
         TerrainTile.LoadImages();
-        City.LoadImages();
         map = GetComponent<Tilemap>();
         if(GenerationType == "Four Corners")
         {
@@ -45,23 +43,31 @@ public class WorldGeneration : MonoBehaviour
         gm.overlayF = overlayF;
         gm.terrainmap = map;
         gm.tiles = tiles;
-        startTile = tiles[Random.Range(1, tiles.GetLength(0) - 1), Random.Range(1, tiles.GetLength(1) - 1)];
-        while(startTile.type == "Water")
-        {
-            startTile = tiles[Random.Range(1, tiles.GetLength(0) - 1), Random.Range(1, tiles.GetLength(1) - 1)];
-        }
-        Empires e = new Empires("America");
-        startTile.AddCity(buildingoverlay, e);
-        gm.empires.Add(e);
-        gm.player = e;
         gm.mapWidth = mapWidth;
         gm.mapHeight = mapHeight;
+        AddEmpires();
     }
     // Pick certain num random tiles (always 5 tiles or area / 5 for example), pick same num of random positions (random x and y value), all tiles different
-    // Update is called once per frame
-    void Update()
+
+    void AddEmpires()
     {
-        
+        Empires[] empires = { new Empires("The Mushroom Kingdom"), new FlowerKingdom() };
+        gm.player = empires[0];
+        foreach (var empire in empires)
+        {
+            gm.empires.Add(empire);
+            TerrainTile startTile;
+            do
+            {
+                startTile = tiles[Random.Range(1, tiles.GetLength(0) - 1), Random.Range(1, tiles.GetLength(1) - 1)];
+            } while (startTile.type == "Water");
+            string name = "Test";
+            if(empire != gm.player)
+            {
+                name = empire.cityNames[0];
+            }
+            startTile.AddCity(empire, name);
+        }
     }
 
     void BaseGeneration()

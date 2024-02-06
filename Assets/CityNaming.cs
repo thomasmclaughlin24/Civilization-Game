@@ -8,6 +8,7 @@ public class CityNaming : MonoBehaviour
 {
     public GameObject CityNameInput;
     public GameObject CityName;
+    public GameManager gm;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,5 +24,6 @@ public class CityNaming : MonoBehaviour
     public void CloseCityNaming()
     {
         CityName.SetActive(false);
+        gm.player.cities[0].name = GetComponent<TMP_InputField>().text;
     }
 }

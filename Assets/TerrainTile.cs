@@ -15,22 +15,31 @@ public class TerrainTile
     public int x;
     public int y;
     public Sprite tileImage;
-    public static Sprite grassImage, waterImage, gravelImage, sandImage, desertImage;
-    public bool hasCity = false;
+    public static Sprite grassImage, waterImage, gravelImage, sandImage, desertImage, fogImage;
+    public bool hasCity = false; //whether there is a city center on this tile
     public static Sprite cityImage;
     public GameManager gm;
+    public Tilemap cityOverlay;
     public int gridX, gridY;
     public City city;
     public Buildings building;
+    public bool isRevealed;
+    public List<Units> unitList = new List<Units>();
 
-    public TerrainTile(string type, int x, int y, GameManager gm, int gridX, int gridY)
+    public TerrainTile(string type, int x, int y, GameManager gm, int gridX, int gridY, bool isRevealed = false)
     {
         this.type = type;
         this.x = x;
         this.y = y;
         this.gm = gm;
+        this.cityOverlay = gm.buildingoverlay;
         this.gridX = gridX;
         this.gridY = gridY;
+        this.isRevealed = isRevealed;
+        if(isRevealed == false)
+        {
+            SetTile(gm.fogoverlay, fogImage);
+        }
         if(type == "Grass")
         {
             basefood = 5;
@@ -87,18 +96,17 @@ public class TerrainTile
         sandImage = Resources.Load<Sprite>("Tile Sprites/Desert Rocky Dirt Tile");
         desertImage = Resources.Load<Sprite>("Tile Sprites/Desert Tile");
         cityImage = Resources.Load<Sprite>("Tile Sprites/City Tile");
+        fogImage = Resources.Load<Sprite>("Tile Sprites/Fog Tile");
     }
 
-    public void AddCity(Tilemap overlay, Empires empire)
+    public void AddCity(Empires empire, string name)
     {
         Vector3Int position = new Vector3Int(x, y, 0);
         Tile t = ScriptableObject.CreateInstance<Tile>();
         t.sprite = cityImage;
-        overlay.SetTile(position, t);
+        cityOverlay.SetTile(position, t);
         hasCity = true;
-        City c = new City(this);
-        empire.cities.Add(c);
-        c.empire = empire;
+        City c = new City(this, name, empire);
         city = c;
     }
 
@@ -113,5 +121,51 @@ public class TerrainTile
         Tile t = ScriptableObject.CreateInstance<Tile>();
         t.sprite = sprite;
         map.SetTile(position, t);
+    }
+
+    public void Reveal()
+    {
+        if(isRevealed == true)
+        {
+            return;
+        }
+        isRevealed = true;
+        gm.fogoverlay.SetTile(new Vector3Int(x, y, 0), null);
+    }
+
+    public void RevealAround()
+    {
+        Reveal();
+        TerrainTile[,] tiles = gm.tiles;
+        if (y % 2 == 0)
+        {
+            if (gridX < tiles.GetLength(0) - 1)
+                tiles[gridX + 1, gridY].Reveal();
+            if (gridY < tiles.GetLength(1) - 1)
+                tiles[gridX, gridY + 1].Reveal();
+            if (gridX > 0)
+                tiles[gridX - 1, gridY].Reveal();
+            if (gridY > 0)
+                tiles[gridX, gridY - 1].Reveal();
+            if (gridX > 0 && gridY < tiles.GetLength(1) - 1)
+                tiles[gridX - 1, gridY + 1].Reveal();
+            if (gridX > 0 && gridY > 0)
+                tiles[gridX - 1, gridY - 1].Reveal();
+        }
+        else
+        {
+            if (gridY > 0)
+                tiles[gridX, gridY - 1].Reveal();
+            if (gridX < tiles.GetLength(0) - 1)
+                tiles[gridX + 1, gridY].Reveal();
+            if (gridX > 0)
+                tiles[gridX - 1, gridY].Reveal();
+            if (gridY < tiles.GetLength(1) - 1)
+                tiles[gridX, gridY + 1].Reveal();
+            if (gridX < tiles.GetLength(0) - 1 && gridY < tiles.GetLength(1) - 1)
+                tiles[gridX + 1, gridY + 1].Reveal();
+            if (gridX < tiles.GetLength(0) - 1 && gridY > 0)
+                tiles[gridX + 1, gridY - 1].Reveal();
+        }
     }
 }

@@ -9,7 +9,7 @@ public class TurnButton : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        gm = GameObject.Find("/GameManager").GetComponent<GameManager>();
+        gm = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     public void NextTurn()
@@ -24,7 +24,11 @@ public class TurnButton : MonoBehaviour
                 e.totalculture += c.GetCulturePerTurn();
                 e.totalfaith += c.GetFaithPerTurn();
             }
-            Debug.Log(e.totalfood);
+            if(e != gm.player)
+            {
+                e.TakeTurn(gm);
+            }
+            Debug.Log(e.empirename + " " + e.totalfood.ToString());
         }
         nextturnmusic.Play();
     }

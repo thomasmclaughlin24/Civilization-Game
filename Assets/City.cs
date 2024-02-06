@@ -5,24 +5,30 @@ using UnityEngine.Tilemaps;
 
 public class City
 {
-    private TerrainTile centralTile;
+    internal TerrainTile centralTile;
     public List<TerrainTile> OwnedTiles;
     private GameManager gm;
-    public static Sprite a, b, c, d, e, f;
+    public Sprite a, b, c, d, e, f;
     public Empires empire;
     public float foodmodifier = 1f;
     public float goldmodifier = 1f;
     public float productionmodifier = 1f;
     public float culturemodifier = 1f;
     public float faithmodifier = 1f;
+    public string name;
 
-    public City(TerrainTile centralTile)
+    public City(TerrainTile centralTile, string name, Empires empire)
     {
+        this.name = name;
+        this.empire = empire;
+        empire.cities.Add(this);
         OwnedTiles = new List<TerrainTile>();
         this.centralTile = centralTile;
         gm = centralTile.gm;
         TerrainTile[,] tiles = gm.tiles;
-        if(centralTile.y % 2 == 0)
+        LoadImages();
+        
+        if (centralTile.y % 2 == 0)
         {
             AddTile(tiles[centralTile.gridX + 1, centralTile.gridY]);
             AddTile(tiles[centralTile.gridX, centralTile.gridY + 1]);
@@ -44,7 +50,7 @@ public class City
         AddTile(centralTile);
     }
 
-    public static void LoadImages()
+    private void LoadImages()
     {
         a = Resources.Load<Sprite>("Tile Sprites/a");
         b = Resources.Load<Sprite>("Tile Sprites/b");
@@ -61,6 +67,10 @@ public class City
             return;
         }
         OwnedTiles.Add(tile);
+        if(empire == gm.player)
+        {
+            tile.RevealAround();
+        }
         tile.city = this;
         CityBoundaryAdjustment();
     }
@@ -70,106 +80,131 @@ public class City
         TerrainTile[,] tiles = gm.tiles;
         foreach (TerrainTile tile in OwnedTiles)
         {
+            Vector3Int position = new Vector3Int(tile.x, tile.y, 0);
             if (tile.y % 2 == 0)
             {
-                if(tile.gridX < tiles.GetLength(0) - 1 && tiles[tile.gridX + 1, tile.gridY].city == null)
+                if (tile.gridX < tiles.GetLength(0) - 1 && (tiles[tile.gridX + 1, tile.gridY].city == null || tiles[tile.gridX + 1, tile.gridY].city.empire != empire))
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayA, a);
+                    tile.SetTile(position, gm.overlayA, a);
+                    gm.overlayA.SetTileFlags(position, TileFlags.None);
+                    gm.overlayA.SetColor(position, empire.borderColor);
                 }
                 else
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayA, null);
+                    tile.SetTile(position, gm.overlayA, null);
                 }
-                if(tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX, tile.gridY + 1].city == null)
+                if(tile.gridY < tiles.GetLength(1) - 1 && (tiles[tile.gridX, tile.gridY + 1].city == null || tiles[tile.gridX, tile.gridY + 1].city.empire != empire))
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayB, b);
-                }
-                else
-                {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayB, null);
-                }
-                if(tile.gridX > 0 && tiles[tile.gridX - 1, tile.gridY].city == null)
-                {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayD, d);
+                    tile.SetTile(position, gm.overlayB, b);
+                    gm.overlayB.SetTileFlags(position, TileFlags.None);
+                    gm.overlayB.SetColor(position, empire.borderColor);
                 }
                 else
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayD, null);
+                    tile.SetTile(position, gm.overlayB, null);
                 }
-                if(tile.gridY > 0 && tiles[tile.gridX, tile.gridY - 1].city == null)
+                if(tile.gridX > 0 && (tiles[tile.gridX - 1, tile.gridY].city == null || tiles[tile.gridX - 1, tile.gridY].city.empire != empire))
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayF, f);
-                }
-                else
-                {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayF, null);
-                }
-                if(tile.gridX > 0 && tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX - 1, tile.gridY + 1].city == null)
-                {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayC, c);
+                    tile.SetTile(position, gm.overlayD, d);
+                    gm.overlayD.SetTileFlags(position, TileFlags.None);
+                    gm.overlayD.SetColor(position, empire.borderColor);
                 }
                 else
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayC, null);
+                    tile.SetTile(position, gm.overlayD, null);
                 }
-                if(tile.gridX > 0 && tile.gridY > 0 && tiles[tile.gridX - 1, tile.gridY - 1].city == null)
+                if(tile.gridY > 0 && (tiles[tile.gridX, tile.gridY - 1].city == null || tiles[tile.gridX, tile.gridY - 1].city.empire != empire))
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayE, e);
+                    tile.SetTile(position, gm.overlayF, f);
+                    gm.overlayF.SetTileFlags(position, TileFlags.None);
+                    gm.overlayF.SetColor(position, empire.borderColor);
                 }
                 else
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayE, null);
+                    tile.SetTile(position, gm.overlayF, null);
+                }
+                if(tile.gridX > 0 && tile.gridY < tiles.GetLength(1) - 1 && (tiles[tile.gridX - 1, tile.gridY + 1].city == null || tiles[tile.gridX - 1, tile.gridY + 1].city.empire != empire))
+                {
+                    tile.SetTile(position, gm.overlayC, c);
+                    gm.overlayC.SetTileFlags(position, TileFlags.None);
+                    gm.overlayC.SetColor(position, empire.borderColor);
+                }
+                else
+                {
+                    tile.SetTile(position, gm.overlayC, null);
+                }
+                if(tile.gridX > 0 && tile.gridY > 0 && (tiles[tile.gridX - 1, tile.gridY - 1].city == null || tiles[tile.gridX - 1, tile.gridY - 1].city.empire != empire))
+                {
+                    tile.SetTile(position, gm.overlayE, e);
+                    gm.overlayE.SetTileFlags(position, TileFlags.None);
+                    gm.overlayE.SetColor(position, empire.borderColor);
+                }
+                else
+                {
+                    tile.SetTile(position, gm.overlayE, null);
                 }
             }
             else
             {
-                if(tile.gridY > 0 && tiles[tile.gridX, tile.gridY - 1].city == null)
+                if(tile.gridY > 0 && (tiles[tile.gridX, tile.gridY - 1].city == null || tiles[tile.gridX, tile.gridY - 1].city.empire != empire))
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayE, e);
+                    tile.SetTile(position, gm.overlayE, e);
+                    gm.overlayE.SetTileFlags(position, TileFlags.None);
+                    gm.overlayE.SetColor(position, empire.borderColor);
                 }
                 else
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayE, null);
+                    tile.SetTile(position, gm.overlayE, null);
                 }
-                if(tile.gridX < tiles.GetLength(0) - 1 && tiles[tile.gridX + 1, tile.gridY].city == null)
+                if(tile.gridX < tiles.GetLength(0) - 1 && (tiles[tile.gridX + 1, tile.gridY].city == null || tiles[tile.gridX + 1, tile.gridY].city.empire != empire))
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayA, a);
-                }
-                else
-                {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayA, null);
-                }
-                if(tile.gridX > 0 && tiles[tile.gridX - 1, tile.gridY].city == null)
-                {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayD, d);
+                    tile.SetTile(position, gm.overlayA, a);
+                    gm.overlayA.SetTileFlags(position, TileFlags.None);
+                    gm.overlayA.SetColor(position, empire.borderColor);
                 }
                 else
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayD, null);
+                    tile.SetTile(position, gm.overlayA, null);
                 }
-                if(tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX, tile.gridY + 1].city == null)
+                if(tile.gridX > 0 && (tiles[tile.gridX - 1, tile.gridY].city == null || tiles[tile.gridX - 1, tile.gridY].city.empire != empire))
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayC, c);
-                }
-                else
-                {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayC, null);
-                }
-                if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX + 1, tile.gridY + 1].city == null)
-                {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayB, b);
+                    tile.SetTile(position, gm.overlayD, d);
+                    gm.overlayD.SetTileFlags(position, TileFlags.None);
+                    gm.overlayD.SetColor(position, empire.borderColor);
                 }
                 else
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayB, null);
+                    tile.SetTile(position, gm.overlayD, null);
                 }
-                if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY > 0 && tiles[tile.gridX + 1, tile.gridY - 1].city == null)
+                if(tile.gridY < tiles.GetLength(1) - 1 && (tiles[tile.gridX, tile.gridY + 1].city == null || tiles[tile.gridX, tile.gridY + 1].city.empire != empire))
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayF, f);
+                    tile.SetTile(position, gm.overlayC, c);
+                    gm.overlayC.SetTileFlags(position, TileFlags.None);
+                    gm.overlayC.SetColor(position, empire.borderColor);
                 }
                 else
                 {
-                    tile.SetTile(new Vector3Int(tile.x, tile.y, 0), gm.overlayF, null);
+                    tile.SetTile(position, gm.overlayC, null);
+                }
+                if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY < tiles.GetLength(1) - 1 && (tiles[tile.gridX + 1, tile.gridY + 1].city == null || tiles[tile.gridX + 1, tile.gridY + 1].city.empire != empire))
+                {
+                    tile.SetTile(position, gm.overlayB, b);
+                    gm.overlayB.SetTileFlags(position, TileFlags.None);
+                    gm.overlayB.SetColor(new Vector3Int(tile.x, tile.y, 0), empire.borderColor);
+                }
+                else
+                {
+                    tile.SetTile(position, gm.overlayB, null);
+                }
+                if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY > 0 && (tiles[tile.gridX + 1, tile.gridY - 1].city == null || tiles[tile.gridX + 1, tile.gridY - 1].city.empire != empire))
+                {
+                    tile.SetTile(position, gm.overlayF, f);
+                    gm.overlayF.SetTileFlags(position, TileFlags.None);
+                    gm.overlayF.SetColor(position, empire.borderColor);
+                }
+                else
+                {
+                    tile.SetTile(position, gm.overlayF, null);
                 }
             }
         }
@@ -180,32 +215,32 @@ public class City
         TerrainTile[,] tiles = gm.tiles;
         if (tile.y % 2 == 0)
         {
-            if(tile.gridX < tiles.GetLength(0) - 1)
+            if(tile.gridX < tiles.GetLength(0) - 1 && tiles[tile.gridX + 1, tile.gridY].city == null)
                 AddTile(tiles[tile.gridX + 1, tile.gridY]);
-            if(tile.gridY < tiles.GetLength(1) - 1)
+            if(tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX, tile.gridY + 1].city == null)
                 AddTile(tiles[tile.gridX, tile.gridY + 1]);
-            if(tile.gridX > 0)
+            if(tile.gridX > 0 && tiles[tile.gridX - 1, tile.gridY].city == null)
                 AddTile(tiles[tile.gridX - 1, tile.gridY]);
-            if(tile.gridY > 0)
+            if(tile.gridY > 0 && tiles[tile.gridX, tile.gridY - 1].city == null)
                 AddTile(tiles[tile.gridX, tile.gridY - 1]);
-            if(tile.gridX > 0 && tile.gridY < tiles.GetLength(1) - 1)
+            if(tile.gridX > 0 && tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX - 1, tile.gridY + 1].city == null)
                 AddTile(tiles[tile.gridX - 1, tile.gridY + 1]);
-            if(tile.gridX > 0 && tile.gridY > 0)
+            if(tile.gridX > 0 && tile.gridY > 0 && tiles[tile.gridX - 1, tile.gridY - 1].city == null)
                 AddTile(tiles[tile.gridX - 1, tile.gridY - 1]);
         }
         else
         {
-            if(tile.gridY > 0)
+            if(tile.gridY > 0 && tiles[tile.gridX, tile.gridY - 1].city == null)
                 AddTile(tiles[tile.gridX, tile.gridY - 1]);
-            if(tile.gridX < tiles.GetLength(0) - 1)
+            if(tile.gridX < tiles.GetLength(0) - 1 && tiles[tile.gridX + 1, tile.gridY].city == null)
                 AddTile(tiles[tile.gridX + 1, tile.gridY]);
-            if(tile.gridX > 0)
+            if(tile.gridX > 0 && tiles[tile.gridX - 1, tile.gridY].city == null)
                 AddTile(tiles[tile.gridX - 1, tile.gridY]);
-            if(tile.gridY < tiles.GetLength(1) - 1)
+            if(tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX, tile.gridY + 1].city == null)
                 AddTile(tiles[tile.gridX, tile.gridY + 1]);
-            if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY < tiles.GetLength(1) - 1)
+            if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY < tiles.GetLength(1) - 1 && tiles[tile.gridX + 1, tile.gridY + 1].city == null)
                 AddTile(tiles[tile.gridX + 1, tile.gridY + 1]);
-            if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY > 0)
+            if(tile.gridX < tiles.GetLength(0) - 1 && tile.gridY > 0 && tiles[tile.gridX + 1, tile.gridY - 1].city == null)
                 AddTile(tiles[tile.gridX + 1, tile.gridY - 1]);
         }
     }
