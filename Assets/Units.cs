@@ -81,11 +81,15 @@ public class Units
     {
         //tell GameManager to wait for TileClick
         //after tile is clicked, GameManager runs Move with tile that was clicked passed in
+        gm.onTileClicked.AddListener(Move);
+        Debug.Log("Trying to Move");
     }
 
-    public void Move(TerrainTile moveToTile)
+    public void Move()
     {
-        SetTile(moveToTile);
+        SetTile(gm.selectedTile);
+        Debug.Log("Moved");
+        gm.onTileClicked.RemoveListener(Move);
     }
 
     public void Defend(Units attacker, int damage)

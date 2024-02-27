@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using TMPro;
 
 public class CircleMenu : MonoBehaviour
 {
@@ -50,7 +51,6 @@ public class CircleMenu : MonoBehaviour
         else
         {
             toVector2M = new Vector2(Mouseposition.x / Screen.width, Mouseposition.y / Screen.height);
-            Debug.Log(toVector2M);
             float angle = (Mathf.Atan2(fromVector2M.y - centercircle.y, fromVector2M.x - centercircle.x) - Mathf.Atan2(toVector2M.y - centercircle.y, toVector2M.x - centercircle.x)) * Mathf.Rad2Deg;
             if (angle < 0)
             {
@@ -104,7 +104,13 @@ public class CircleMenu : MonoBehaviour
                 button.sceneimage = sceneImageComponent;
                 button.sceneimage.color = button.normalColor;
                 sceneImageComponent.fillAmount = 1f / buttonList.Count;
-                buttonImage.transform.Rotate(0f, 0f, 360f - ((360f / buttonList.Count) * i));
+                float imageAngle = 360f - ((360f / buttonList.Count) * i);
+                buttonImage.transform.Rotate(0f, 0f, imageAngle);
+                GameObject buttonText = buttonImage.transform.Find("Text").gameObject;
+                buttonText.GetComponent<TextMeshProUGUI>().text = button.name;
+                buttonText.transform.Rotate(0f, 0f, -imageAngle);
+                float textAngle = Mathf.Deg2Rad * (((imageAngle + 360f) % 360f) + (sceneImageComponent.fillAmount / 2) * 360f + 90f);
+                buttonText.GetComponent<RectTransform>().anchoredPosition = new Vector3(0.25f * Mathf.Cos(textAngle), 0.25f * Mathf.Sin(textAngle), 0f);
             }
             centerPosition = buttons[0].sceneimage.gameObject.transform.position;
             radius = buttons[0].sceneimage.gameObject.transform.localScale.x / 2;
@@ -129,14 +135,16 @@ public class MenuButton
 {
     public string name;
     public Image sceneimage;
-    public Color normalColor = Color.black;
-    public Color highlightedColor = Color.white;
+    public Color normalColor = Color.white;
+    public Color highlightedColor = Color.black;
     public Color pressedColor = Color.white;
+    public Color textColor = Color.white;
+    public Color textHighlightedColor = Color.black;
     public UnityEvent whenPressed;
 
     public MenuButton(string name, UnityEvent whenPressed)
     {
-        name = this.name;
-        whenPressed = this.whenPressed;
+        this.name = name;
+        this.whenPressed = whenPressed;
     }
 }

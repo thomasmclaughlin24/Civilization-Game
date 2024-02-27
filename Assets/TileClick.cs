@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using System;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class TileClick : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class TileClick : MonoBehaviour
     public CityPanel cityPanelPlayer;
     public CityPanel cityPanelAI;
     public BuildingsPanel buildingsPanel;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -34,6 +36,8 @@ public class TileClick : MonoBehaviour
         try 
         {
             TerrainTile t = gm.tiles[gm.hit.x + gm.mapWidth / 2, gm.hit.y + gm.mapHeight / 2];
+            gm.selectedTile = t;
+            gm.onTileClicked.Invoke();
             if (t.hasCity == true)
             {
                 var openPanel = cityPanelAI;
@@ -65,6 +69,7 @@ public class TileClick : MonoBehaviour
                 {
                     menuButtonList.Add(new MenuButton(action.Key, action.Value));
                 }
+                Debug.Log(menuButtonList[0].name);
                 CircleMenu.MakeCircleMenu(menuButtonList, gm.UIPanel);
             }
         }

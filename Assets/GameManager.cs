@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.Events;
 
 public class GameManager : MonoBehaviour
 {
@@ -26,6 +27,8 @@ public class GameManager : MonoBehaviour
     public string unitProductionMode = "Food";
     public GameObject UIPanel;
     public GameObject unitIconPanel;
+    public TerrainTile selectedTile;
+    public UnityEvent onTileClicked = new UnityEvent();
 
     // Start is called before the first frame update
     void Start()
