@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
+using System.Linq;
 
 public class TerrainTile
 {
@@ -133,39 +134,157 @@ public class TerrainTile
         gm.fogoverlay.SetTile(new Vector3Int(x, y, 0), null);
     }
 
-    public void RevealAround()
+    public List<Node> GetNeighborNodes()
     {
-        Reveal();
+        List<TerrainTile> neighbors = GetNeighbors();
+        List<Node> neighborNodes = new List<Node>();
+        foreach(TerrainTile n in neighbors)
+        {
+            neighborNodes.Add(new Node(n));
+        }
+        return neighborNodes;
+    }
+
+    public List<TerrainTile> GetNeighbors()
+    {
         TerrainTile[,] tiles = gm.tiles;
+        List<TerrainTile> neighbors = new List<TerrainTile>();
         if (y % 2 == 0)
         {
             if (gridX < tiles.GetLength(0) - 1)
-                tiles[gridX + 1, gridY].Reveal();
+                neighbors.Add(tiles[gridX + 1, gridY]);
             if (gridY < tiles.GetLength(1) - 1)
-                tiles[gridX, gridY + 1].Reveal();
+                neighbors.Add(tiles[gridX, gridY + 1]);
             if (gridX > 0)
-                tiles[gridX - 1, gridY].Reveal();
+                neighbors.Add(tiles[gridX - 1, gridY]);
             if (gridY > 0)
-                tiles[gridX, gridY - 1].Reveal();
+                neighbors.Add(tiles[gridX, gridY - 1]);
             if (gridX > 0 && gridY < tiles.GetLength(1) - 1)
-                tiles[gridX - 1, gridY + 1].Reveal();
+                neighbors.Add(tiles[gridX - 1, gridY + 1]);
             if (gridX > 0 && gridY > 0)
-                tiles[gridX - 1, gridY - 1].Reveal();
+                neighbors.Add(tiles[gridX - 1, gridY - 1]);
         }
         else
         {
             if (gridY > 0)
-                tiles[gridX, gridY - 1].Reveal();
+                neighbors.Add(tiles[gridX, gridY - 1]);
             if (gridX < tiles.GetLength(0) - 1)
-                tiles[gridX + 1, gridY].Reveal();
+                neighbors.Add(tiles[gridX + 1, gridY]);
             if (gridX > 0)
-                tiles[gridX - 1, gridY].Reveal();
+                neighbors.Add(tiles[gridX - 1, gridY]);
             if (gridY < tiles.GetLength(1) - 1)
-                tiles[gridX, gridY + 1].Reveal();
+                neighbors.Add(tiles[gridX, gridY + 1]);
             if (gridX < tiles.GetLength(0) - 1 && gridY < tiles.GetLength(1) - 1)
-                tiles[gridX + 1, gridY + 1].Reveal();
+                neighbors.Add(tiles[gridX + 1, gridY + 1]);
             if (gridX < tiles.GetLength(0) - 1 && gridY > 0)
-                tiles[gridX + 1, gridY - 1].Reveal();
+                neighbors.Add(tiles[gridX + 1, gridY - 1]);
         }
+        return neighbors;
+    }
+
+    public void RevealAround()
+    {
+        Reveal();
+        List<TerrainTile> neighbors = GetNeighbors();
+        foreach(TerrainTile tile in neighbors)
+        {
+            tile.Reveal();
+        }
+    }
+
+    public static int GetDistance(Node node1, Node node2)
+    {
+        int dx = node2.tile.x - node1.tile.x;
+        int dy = node2.tile.y - node1.tile.y;
+        int absx = Mathf.Abs(dx);
+        int absy = Mathf.Abs(dy);
+
+        if((dx < 0) ^ (node1.tile.y % 2 == 1))
+        {
+            absx = Mathf.Max(0, absx - (absy + 1) / 2);
+        }
+        else
+        {
+            absx = Mathf.Max(0, absx - absy / 2);
+        }
+        return absx + absy;
+    }
+
+    public List<Node> FindPathTo(TerrainTile target)
+    {
+        
+        var height = gm.tiles.GetLength(1);
+        var width = gm.tiles.GetLength(0);
+        List<Node> open = new List<Node>();
+        List<Node> closed = new List<Node>();
+        Node startNode = new Node(this);
+        Node endNode = new Node(target);
+
+        open.Add(startNode);
+        while(open.Count > 0)
+        {
+            Node currentNode = open[0];
+            for(var i=1; i<open.Count; i++)
+            {
+                if(open[i].fcost < currentNode.fcost || open[i].fcost == currentNode.fcost && open[i].hcost < currentNode.hcost)
+                {
+                    currentNode = open[i];
+                }
+            }
+            open.Remove(currentNode);
+            closed.Add(currentNode);
+            if (currentNode.Equals(endNode))
+            {
+                List<Node> path = new List<Node>();
+                while(currentNode != startNode)
+                {
+                    path.Insert(0, currentNode);
+                    currentNode = currentNode.parent;
+                }
+                return path; //Retrace path
+            }
+            foreach(Node neighbor in currentNode.tile.GetNeighborNodes())
+            {
+                if(closed.Any(n => n.tile == neighbor.tile))
+                {
+                    continue;
+                }
+                int neighborMoveCost = currentNode.gcost + 1;
+                if(neighborMoveCost < neighbor.gcost || !open.Any(n => n.tile == neighbor.tile))
+                {
+                    neighbor.gcost = neighborMoveCost;
+                    neighbor.hcost = GetDistance(neighbor, endNode);
+                    neighbor.parent = currentNode;
+                    if(!open.Any(n => n.tile == neighbor.tile))
+                    {
+                        open.Add(neighbor);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+}
+
+public class Node
+{
+    public int fcost = 10000;
+    public int gcost = 10000;
+    public int hcost = 10000;
+    public Node parent;
+    public TerrainTile tile;
+    public Node(TerrainTile tile)
+    {
+        this.tile = tile;
+    }
+
+    public override bool Equals(object obj)
+    {
+        var other = obj as Node;
+        if(other == null)
+        {
+            return false;
+        }
+        return this.tile.Equals(other.tile);
     }
 }

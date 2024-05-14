@@ -24,7 +24,12 @@ public class TurnButton : MonoBehaviour
                 e.totalculture += c.GetCulturePerTurn();
                 e.totalfaith += c.GetFaithPerTurn();
             }
-            if(e != gm.player)
+            foreach (Units unit in e.units)
+            {
+                unit.ProcessTurn();
+                Debug.Log("Processed Unit Turn");
+            }
+            if (e != gm.player)
             {
                 e.TakeTurn(gm);
             }

@@ -108,9 +108,10 @@ public class CircleMenu : MonoBehaviour
                 buttonImage.transform.Rotate(0f, 0f, imageAngle);
                 GameObject buttonText = buttonImage.transform.Find("Text").gameObject;
                 buttonText.GetComponent<TextMeshProUGUI>().text = button.name;
-                buttonText.transform.Rotate(0f, 0f, -imageAngle);
-                float textAngle = Mathf.Deg2Rad * (((imageAngle + 360f) % 360f) + (sceneImageComponent.fillAmount / 2) * 360f + 90f);
-                buttonText.GetComponent<RectTransform>().anchoredPosition = new Vector3(0.25f * Mathf.Cos(textAngle), 0.25f * Mathf.Sin(textAngle), 0f);
+                //buttonText.transform.Rotate(0f, 0f, -imageAngle);
+                //float textAngle = Mathf.Deg2Rad * (((imageAngle + 360f) % 360f) + (sceneImageComponent.fillAmount / 2) * 360f + 90f);
+                //buttonText.GetComponent<RectTransform>().anchoredPosition = new Vector3(0.25f * Mathf.Cos(textAngle), 0.25f * Mathf.Sin(textAngle), 0f);
+                buttonText.GetComponent<RectTransform>().rotation = Quaternion.identity;
             }
             centerPosition = buttons[0].sceneimage.gameObject.transform.position;
             radius = buttons[0].sceneimage.gameObject.transform.localScale.x / 2;

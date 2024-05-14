@@ -17,6 +17,7 @@ public class Units
     public int foodcost;
     public int culturecost;
     public Dictionary<string, UnityEvent> actions = new Dictionary<string, UnityEvent>();
+    private int movementLeft;
 
     public Units(string name, int moveSpeed, int strength, int HP, int foodcost, int culturecost, TerrainTile startTile, Empires empire, Sprite unitImage)
     {
@@ -28,15 +29,17 @@ public class Units
         this.name = name;
         this.currentTile = startTile;
         this.empire = empire;
-        if(moveSpeed > 0)
+        this.movementLeft = moveSpeed;
+        if (moveSpeed > 0)
         {
             UnityEvent move = new UnityEvent();
             move.AddListener(startMove);
             this.actions.Add("Move", move);
         }
-        if(empire != null)
+        if (empire != null)
         {
             empire.units.Add(this);
+            Debug.Log(empire.empirename);
         }
         this.unitImage = unitImage;
         gm = GameObject.Find("GameManager").GetComponent<GameManager>();
@@ -65,6 +68,11 @@ public class Units
         return new Units("ERROR", 0, 0, 0, 0, 0, null, null, null);
     }
 
+    public void ProcessTurn()
+    {
+        movementLeft = moveSpeed;
+    }
+
     public void SetTile(TerrainTile moveToTile)
     {
         if(currentTile != null)
@@ -82,13 +90,29 @@ public class Units
         //tell GameManager to wait for TileClick
         //after tile is clicked, GameManager runs Move with tile that was clicked passed in
         gm.onTileClicked.AddListener(Move);
-        Debug.Log("Trying to Move");
+        //Debug.Log("Trying to Move");
     }
 
     public void Move()
     {
-        SetTile(gm.selectedTile);
-        Debug.Log("Moved");
+        var path = currentTile.FindPathTo(gm.selectedTile);
+        if(path == null || path.Count == 0 || movementLeft == 0)
+        {
+            gm.onTileClicked.RemoveListener(Move);
+            return;
+        }
+        var distance = movementLeft;
+        if(movementLeft >= path.Count)
+        {
+            SetTile(gm.selectedTile);
+            distance = path.Count;
+        }
+        else
+        {
+            SetTile(path[movementLeft - 1].tile);
+        }
+        //Debug.Log("Moved " + distance + " tiles.");
+        movementLeft -= distance;
         gm.onTileClicked.RemoveListener(Move);
     }
 

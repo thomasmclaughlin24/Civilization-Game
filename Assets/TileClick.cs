@@ -52,7 +52,7 @@ public class TileClick : MonoBehaviour
             }
             if(t.unitList.Count > 0)
             {
-                Debug.Log(t.unitList);
+                //Debug.Log(t.unitList);
                 for(var i = gm.unitIconPanel.transform.childCount - 1; i>=0; i--)
                 {
                     GameObject.Destroy(gm.unitIconPanel.transform.GetChild(i).gameObject);
@@ -69,7 +69,7 @@ public class TileClick : MonoBehaviour
                 {
                     menuButtonList.Add(new MenuButton(action.Key, action.Value));
                 }
-                Debug.Log(menuButtonList[0].name);
+                //Debug.Log(menuButtonList[0].name);
                 CircleMenu.MakeCircleMenu(menuButtonList, gm.UIPanel);
             }
         }
